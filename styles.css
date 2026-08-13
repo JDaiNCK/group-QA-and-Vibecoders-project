@@ -1,0 +1,222 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.circle-1 { width: 220px; height: 220px; background: rgba(180, 180, 220, 0.35); top: -40px; left: 20%; }
+.circle-2 { width: 120px; height: 120px; background: rgba(80, 80, 220, 0.7); top: -10px; left: 28%; }
+.circle-3 { width: 280px; height: 280px; background: rgba(180, 180, 220, 0.3); top: -60px; right: 10%; }
+.circle-4 { width: 80px; height: 80px; background: rgba(80, 80, 220, 0.65); top: 40px; right: 28%; }
+.circle-5 { width: 300px; height: 300px; background: rgba(180, 180, 220, 0.25); top: 100px; right: -60px; }
+.circle-6 { width: 180px; height: 180px; background: rgba(180, 180, 220, 0.35); top: 60px; left: -40px; }
+.circle-7 { width: 250px; height: 250px; background: rgba(180, 180, 220, 0.3); bottom: 60px; left: 10%; }
+.circle-8 { width: 100px; height: 100px; background: rgba(110, 110, 220, 0.6); bottom: 20px; left: 30%; }
+.circle-9 { width: 320px; height: 320px; background: rgba(180, 180, 220, 0.25); bottom: -80px; left: 40%; }
+.circle-10 { width: 200px; height: 200px; background: rgba(180, 180, 220, 0.3); bottom: -40px; right: 5%; }
+.circle-11 { width: 150px; height: 150px; background: rgba(180, 180, 220, 0.35); bottom: 100px; right: -30px; }
+.circle-12 { width: 260px; height: 260px; background: rgba(180, 180, 220, 0.28); bottom: 150px; left: 55%; }
+.circle-13 { width: 110px; height: 110px; background: rgba(80, 80, 220, 0.6); top: 300px; right: 5%; }
+.circle-14 { width: 180px; height: 180px; background: rgba(180, 180, 220, 0.3); top: 250px; left: 15%; }
+.circle-15 { width: 70px; height: 70px; background: rgba(110, 110, 220, 0.65); top: 180px; left: 5%; }
+
+.form-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    perspective: 1000px;
+}
+
+.form-wrapper {
+    position: relative;
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.form-wrapper.sliding {
+    transform: translateX(-110%);
+    opacity: 0;
+}
+
+.form-wrapper.sliding-in {
+    transform: translateX(110%);
+    opacity: 0;
+}
+
+.form-card {
+    background: transparent;
+    padding: 40px 20px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #5555cc;
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+
+.input-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.row {
+    display: flex;
+    gap: 12px;
+}
+
+.row .input-group {
+    flex: 1;
+}
+
+.input-group.has-icon-right input {
+    padding-left: 16px;
+    padding-right: 44px;
+}
+
+.input-icon-right {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+
+.input-icon-right svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: #5555cc;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #4444bb;
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 14px;
+    color: #333;
+}
+
+.form-footer a {
+    color: #5555cc;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+#register-card {
+    display: none;
+}
+
+.slide-out-left {
+    animation: slideOutLeft 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.slide-out-right {
+    animation: slideOutRight 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutLeft {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(-110%); opacity: 0; }
+}
+
+@keyframes slideInRight {
+    0% { transform: translateX(110%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(110%); opacity: 0; }
+}
+
+@keyframes slideInLeft {
+    0% { transform: translateX(-110%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
