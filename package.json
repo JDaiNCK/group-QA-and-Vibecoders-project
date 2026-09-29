@@ -1,0 +1,19 @@
+{
+  "name": "expense-tracker-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright end-to-end test suite for the Personal Expense Tracker (Vue 3 + Laravel API)",
+  "scripts": {
+    "test": "playwright test",
+    "test:functional": "playwright test tests/functional",
+    "test:ui": "playwright test tests/ui",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "db:reset": "php tools/php/php.exe backend/artisan test:reset-expenses"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
