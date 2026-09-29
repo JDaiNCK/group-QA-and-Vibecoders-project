@@ -7,8 +7,11 @@
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-$root = Split-Path -Parent $PSScriptRoot
-$phpDir = Join-Path $root 'tools\php'
+# $PSScriptRoot is <repo>/tools, which is the toolchain root: PHP and Composer
+# both live here, so everything stays inside the gitignored tools/ directory.
+$toolsDir = $PSScriptRoot
+$root = Split-Path -Parent $toolsDir
+$phpDir = Join-Path $toolsDir 'php'
 $phpExe = Join-Path $phpDir 'php.exe'
 $phpVersion = '8.3.35'
 $phpUrl = "https://windows.php.net/downloads/releases/php-$phpVersion-nts-Win32-vs16-x64.zip"
@@ -39,11 +42,11 @@ if (-not (Test-Path (Join-Path $phpDir 'php.ini'))) {
     Write-Host 'php.ini configured'
 }
 
-$composerPhar = Join-Path $root 'tools\composer.phar'
+$composerPhar = Join-Path $toolsDir 'composer.phar'
 if (-not (Test-Path $composerPhar)) {
     $installer = Join-Path $env:TEMP 'composer-setup.php'
     Invoke-WebRequest -Uri 'https://getcomposer.org/installer' -OutFile $installer -UseBasicParsing -TimeoutSec 120
-    & $phpExe $installer --install-dir=$root --filename=composer.phar
+    & $phpExe $installer --install-dir=$toolsDir --filename=composer.phar
 }
 
 Write-Host ''

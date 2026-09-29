@@ -80,6 +80,15 @@ function installPortablePhp() {
 }
 
 function artisan(args, env = {}) {
+  // Without Composer dependencies, Artisan dies on a missing autoloader and
+  // buries the real cause under a stack trace.
+  if (!existsSync(path.join(backendDir, 'vendor', 'autoload.php'))) {
+    fail(
+      'Laravel dependencies are not installed yet.',
+      'Run:  npm run setup',
+    )
+  }
+
   return spawnSync(php(), ['artisan', ...args], {
     cwd: backendDir,
     stdio: 'inherit',
