@@ -50,7 +50,7 @@ export default defineConfig({
   webServer: [
     {
       // Prepares the dedicated e2e database, then serves the Laravel API.
-      command: 'node scripts/start-backend.mjs',
+      command: 'node scripts/dev.mjs --api-only',
       url: 'http://127.0.0.1:8000/up',
       cwd: __dirname,
       reuseExistingServer: !process.env.CI,

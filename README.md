@@ -8,7 +8,7 @@ web-tech/
 ├── backend/            Laravel API (PHP 8.3, SQLite, Sanctum)
 ├── frontend/           Vue 3 + Vite + TypeScript SPA
 ├── tests/              Playwright end-to-end suite
-├── scripts/            start-backend.mjs (used by Playwright's webServer)
+├── scripts/            dev.mjs (npm start, artisan, composer, e2e API)
 ├── tools/              Portable PHP + Composer (gitignored, repo-local)
 └── playwright.config.ts
 ```
@@ -22,16 +22,14 @@ carries a portable PHP 8.3 runtime under `tools/`, installed by the script below
 
 ```powershell
 # 1. Portable PHP 8.3 + Composer into tools/  (skip if tools/php already exists)
-powershell -ExecutionPolicy Bypass -File tools\setup-php.ps1
+npm run setup:php
 
-# 2. Laravel dependencies and database
-$env:PATH = "$PWD\tools\bin;$env:PATH"
-cd backend
-php artisan migrate --seed
-cd ..
+# 2. Laravel dependencies, schema and seed data
+npm run setup:composer
+npm run db:migrate
 
 # 3. Frontend dependencies
-cd frontend; npm install; cd ..
+npm --prefix frontend install
 
 # 4. Playwright + Chromium
 npm install
@@ -40,24 +38,61 @@ npx playwright install chromium
 
 ## Running the application
 
-Two processes, two terminals:
-
-```powershell
-# Terminal 1 — Laravel API on http://127.0.0.1:8000
-cd backend
-php artisan serve
-
-# Terminal 2 — Vue dev server on http://127.0.0.1:5173
-cd frontend
-npm run dev
+```bash
+npm start
 ```
 
+That single command starts both servers and prints the URLs:
+
+```
+  App   http://127.0.0.1:5173
+  API   http://127.0.0.1:8000/api
+  Sign in with  tester@example.com / password
+```
+
+Output from each server is colour-tagged (`api` / `web`) so the two streams stay
+distinguishable. Press `Ctrl+C` to stop both.
+
+`npm start` targets the **development** database
+(`backend/database/database.sqlite`). The Playwright suite uses a separate
+database and starts its own servers, so the two never interfere.
+
+### Available scripts
+
+| Script                   | Purpose                                       |
+| ------------------------ | --------------------------------------------- |
+| `npm start` / `npm dev`  | Run the API and web app together              |
+| `npm run setup:php`      | Install the portable PHP + Composer runtime   |
+| `npm run setup:composer` | Install Laravel's PHP dependencies            |
+| `npm run db:migrate`     | Migrate and seed the dev database             |
+| `npm run db:fresh`       | Drop, re-migrate and re-seed the dev database |
+| `npm run db:reset`       | Delete all expenses                           |
+| `npm run artisan -- ...` | Run any Artisan command                       |
+| `npm test`               | Full Playwright suite (starts its own servers)|
+| `npm run typecheck`      | Typecheck the tests and build the frontend    |
+
+### Running the two servers separately
+
+```bash
+# Terminal 1 - API on http://127.0.0.1:8000
+npm run artisan -- serve
+
+# Terminal 2 - SPA on http://127.0.0.1:5173
+npm --prefix frontend run dev
+```
+
+The `npm run artisan --` prefix routes through `scripts/dev.mjs`, which uses the
+portable PHP in `tools/` so no global PHP is required.
+
 Vite proxies `/api/*` to the Laravel server, so both share an origin in dev.
-Open <http://127.0.0.1:5173> and sign in with `tester@example.com` / `password`.
 
 ## API
 
 All expense routes require a Sanctum bearer token.
+
+`GET /` returns a small JSON pointer to the API and the SPA. This backend is
+API-only — the interface is the Vue app in `frontend/`, so there is no Blade
+view and no separate Laravel asset build.
 
 | Method | Path             | Purpose                          |
 | ------ | ---------------- | -------------------------------- |
@@ -102,11 +137,15 @@ test-only HTTP routes in the application.
 ```
 tests/
 ├── functional/expense-tracker.spec.ts   # 16 functional scenarios
-├── ui/expense-tracker-ui.spec.ts        # 24 UI validation checks
+├── ui/expense-tracker-ui.spec.ts        # 28 UI + responsive checks
 ├── fixtures/expense-data.ts             # deterministic expense data
 ├── helpers/                             # env paths, API client, sign-in, UI actions
 └── global-setup.ts                      # migrate + seed + reset before the suite
 ```
+
+44 tests in total. The UI file covers the desktop and tablet viewports
+(1280x720, 768x1024) plus a mobile pass (390x844) that asserts content stays
+visible and nothing overflows horizontally.
 
 The Vue components carry stable `data-testid` attributes. No `nth-child`,
 generated class selectors, deep CSS paths or XPath are used, and there are no
