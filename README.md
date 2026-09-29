@@ -1,6 +1,6 @@
-﻿# Group Name: QA and Vibecorders
+# Group Name: QA and Vibecorders
 
-## ≡ƒæÑ Group Members
+## 👥 Group Members
 * Member 1 (Leader): JOSH DANIEL UY
 * Member 2: JOSE MANUEL BORJA
 * Member 3: LA LEUNEL B. VALMORIA
@@ -14,12 +14,12 @@ A decoupled web application: a **Vue 3 + TypeScript** single-page app talking to
 
 ```
 web-tech/
-Γö£ΓöÇΓöÇ backend/            Laravel API (PHP 8.3, SQLite, Sanctum)
-Γö£ΓöÇΓöÇ frontend/           Vue 3 + Vite + TypeScript SPA
-Γö£ΓöÇΓöÇ tests/              Playwright end-to-end suite
-Γö£ΓöÇΓöÇ scripts/            dev.mjs (npm start, artisan, composer, e2e API)
-Γö£ΓöÇΓöÇ tools/              Portable PHP + Composer (gitignored, repo-local)
-ΓööΓöÇΓöÇ playwright.config.ts
+├── backend/            Laravel API (PHP 8.3, SQLite, Sanctum)
+├── frontend/           Vue 3 + Vite + TypeScript SPA
+├── tests/              Playwright end-to-end suite
+├── scripts/            dev.mjs (npm start, artisan, composer, e2e API)
+├── tools/              Portable PHP + Composer (gitignored, repo-local)
+└── playwright.config.ts
 ```
 
 ### Requirements
@@ -100,7 +100,7 @@ Vite proxies `/api/*` to the Laravel server, so both share an origin in dev.
 All expense routes require a Sanctum bearer token.
 
 `GET /` returns a small JSON pointer to the API and the SPA. This backend is
-API-only ΓÇö the interface is the Vue app in `frontend/`, so there is no Blade
+API-only — the interface is the Vue app in `frontend/`, so there is no Blade
 view and no separate Laravel asset build.
 
 | Method | Path             | Purpose                          |
@@ -138,18 +138,18 @@ Playwright starts both servers itself, so nothing needs to be running first.
 The suite uses a **dedicated** SQLite database,
 `backend/database/expense_tracker_test.sqlite`, and never touches
 `database/database.sqlite`. Each test resets the `expenses` table through the
-application's own `app:reset-test-expenses` Artisan command ΓÇö there are no
+application's own `app:reset-test-expenses` Artisan command — there are no
 test-only HTTP routes in the application.
 
 #### Structure
 
 ```
 tests/
-Γö£ΓöÇΓöÇ functional/expense-tracker.spec.ts   # 16 functional scenarios
-Γö£ΓöÇΓöÇ ui/expense-tracker-ui.spec.ts        # 28 UI + responsive checks
-Γö£ΓöÇΓöÇ fixtures/expense-data.ts             # deterministic expense data
-Γö£ΓöÇΓöÇ helpers/                             # env paths, API client, sign-in, UI actions
-ΓööΓöÇΓöÇ global-setup.ts                      # migrate + seed + reset before the suite
+├── functional/expense-tracker.spec.ts   # 16 functional scenarios
+├── ui/expense-tracker-ui.spec.ts        # 28 UI + responsive checks
+├── fixtures/expense-data.ts             # deterministic expense data
+├── helpers/                             # env paths, API client, sign-in, UI actions
+└── global-setup.ts                      # migrate + seed + reset before the suite
 ```
 
 44 tests in total. The UI file covers the desktop and tablet viewports
@@ -158,4 +158,4 @@ visible and nothing overflows horizontally.
 
 The Vue components carry stable `data-testid` attributes. No `nth-child`,
 generated class selectors, deep CSS paths or XPath are used, and there are no
-`waitForTimeout` calls ΓÇö synchronisation is on real network and UI conditions.
+`waitForTimeout` calls — synchronisation is on real network and UI conditions.
