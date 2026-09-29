@@ -34,12 +34,49 @@ function fail(...lines) {
   process.exit(1)
 }
 
-/** Prefers the repo-local PHP so the project runs on a machine without it. */
+/** The repo-local PHP, downloaded on first use so a fresh clone just works. */
 function php() {
   const portable = path.join(toolsDir, 'php', process.platform === 'win32' ? 'php.exe' : 'php')
   if (existsSync(portable)) return portable
-  if (process.platform !== 'win32') return 'php'
-  fail('PHP was not found.', `Expected: ${portable}`, 'Install it with:  npm run setup:php')
+  if (process.platform !== 'win32' && hasSystemPhp()) return 'php'
+
+  installPortablePhp()
+  if (existsSync(portable)) return portable
+
+  fail(
+    'PHP is not available and could not be installed automatically.',
+    `Expected: ${portable}`,
+    'Run this by hand:  npm run setup:php',
+  )
+}
+
+function hasSystemPhp() {
+  return spawnSync('php', ['--version'], { stdio: 'ignore' }).status === 0
+}
+
+/**
+ * tools/ is gitignored, so a fresh clone has no PHP. Install the portable
+ * copy rather than failing, since every entry point needs it.
+ */
+function installPortablePhp() {
+  const script = path.join(toolsDir, 'setup-php.ps1')
+  if (!existsSync(script)) {
+    fail(`Cannot install PHP: ${script} is missing from the repository.`)
+  }
+
+  console.log('\nPHP is not installed yet. Fetching the portable runtime (one-time, ~1 min)...\n')
+
+  const shell = process.platform === 'win32' ? 'powershell' : 'pwsh'
+  const status = spawnSync(shell, ['-ExecutionPolicy', 'Bypass', '-File', script], {
+    stdio: 'inherit',
+  }).status
+
+  if (status !== 0) {
+    fail(
+      'The portable PHP installer failed.',
+      'Check your internet connection, or run it by hand:  npm run setup:php',
+    )
+  }
 }
 
 function artisan(args, env = {}) {
@@ -48,6 +85,26 @@ function artisan(args, env = {}) {
     stdio: 'inherit',
     env: { ...process.env, ...env },
   }).status
+}
+
+function runComposer(args) {
+  if (!existsSync(composerPhar)) {
+    fail(`Composer was not found at ${composerPhar}`, 'Run:  npm run setup:php')
+  }
+  return spawnSync(php(), [composerPhar, ...args], {
+    cwd: backendDir,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      COMPOSER_HOME: path.join(toolsDir, 'composer-home'),
+      COMPOSER_ALLOW_SUPERUSER: '1',
+    },
+  }).status
+}
+
+/** npm needs a shell on Windows; Node refuses to spawn npm.cmd directly. */
+function npm(args, cwd) {
+  return spawnSync('npm', args, { cwd, stdio: 'inherit', shell: true }).status
 }
 
 function serve(env = {}) {
@@ -160,22 +217,32 @@ switch (mode) {
     process.exit(artisan(rest))
     break
 
-  case 'composer':
-    if (!existsSync(composerPhar)) {
-      fail(`Composer was not found at ${composerPhar}`, 'Install it with:  npm run setup:php')
-    }
-    process.exit(
-      spawnSync(php(), [composerPhar, ...(rest.length ? rest : ['install'])], {
-        cwd: backendDir,
-        stdio: 'inherit',
-        env: {
-          ...process.env,
-          COMPOSER_HOME: path.join(toolsDir, 'composer-home'),
-          COMPOSER_ALLOW_SUPERUSER: '1',
-        },
-      }).status,
-    )
+  case 'composer': {
+    // php() bootstraps the portable runtime, which also fetches composer.phar.
+    php()
+    process.exit(runComposer(rest.length ? rest : ['install']))
     break
+  }
+
+  // One-shot bootstrap for a fresh clone: runtime, dependencies, database.
+  case 'setup': {
+    php()
+
+    if (!existsSync(path.join(backendDir, 'vendor'))) {
+      console.log('\nInstalling Laravel dependencies...\n')
+      if (runComposer(['install']) !== 0) process.exit(1)
+    }
+
+    if (!existsSync(path.join(frontendDir, 'node_modules'))) {
+      console.log('\nInstalling frontend dependencies...\n')
+      if (npm(['install'], frontendDir) !== 0) process.exit(1)
+    }
+
+    if (artisan(['migrate', '--seed', '--force']) !== 0) process.exit(1)
+
+    console.log('\nSetup complete. Start the app with:  npm start\n')
+    break
+  }
 
   case '--api-only':
     startApiOnly()

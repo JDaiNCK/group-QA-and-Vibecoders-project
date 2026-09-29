@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node scripts/dev.mjs",
     "dev": "node scripts/dev.mjs",
+    "setup": "node scripts/dev.mjs setup",
     "setup:php": "powershell -ExecutionPolicy Bypass -File tools/setup-php.ps1",
     "setup:composer": "node scripts/dev.mjs composer",
     "db:migrate": "node scripts/dev.mjs artisan migrate --seed --force",
