@@ -1,0 +1,35 @@
+# Portable toolchain. tools/setup-php.ps1 is source and stays tracked; only the
+# downloaded runtime and caches are ignored.
+tools/php/
+tools/composer.phar
+tools/composer-home/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+/tests/.auth/
+
+# Laravel
+backend/vendor/
+backend/.env
+backend/.env.backup
+backend/storage/*.key
+backend/database/*.sqlite
+backend/database/*.sqlite-journal
+backend/node_modules/
+
+# Vue build output
+frontend/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

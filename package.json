@@ -1,0 +1,28 @@
+{
+  "name": "expense-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal Expense Tracker: Laravel API + Vue 3 SPA, verified with Playwright end-to-end tests",
+  "scripts": {
+    "start": "node scripts/dev.mjs",
+    "dev": "node scripts/dev.mjs",
+    "setup:php": "powershell -ExecutionPolicy Bypass -File tools/setup-php.ps1",
+    "setup:composer": "node scripts/dev.mjs composer",
+    "db:migrate": "node scripts/dev.mjs artisan migrate --seed --force",
+    "db:fresh": "node scripts/dev.mjs artisan migrate:fresh --seed --force",
+    "db:reset": "node scripts/dev.mjs artisan app:reset-test-expenses",
+    "artisan": "node scripts/dev.mjs artisan",
+    "build:frontend": "npm --prefix frontend run build",
+    "test": "playwright test",
+    "test:functional": "playwright test tests/functional",
+    "test:ui": "playwright test tests/ui",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit && npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
