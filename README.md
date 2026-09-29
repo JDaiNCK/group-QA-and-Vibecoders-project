@@ -29,19 +29,24 @@ carries a portable PHP 8.3 runtime under `tools/`, installed by the script below
 
 ### Setup
 
+From a fresh clone, two commands are enough:
+
 ```powershell
-# 1. Portable PHP 8.3 + Composer into tools/  (skip if tools/php already exists)
-npm run setup:php
+npm install     # Playwright + TypeScript
+npm run setup   # portable PHP, Composer, frontend deps, database
+```
 
-# 2. Laravel dependencies, schema and seed data
-npm run setup:composer
-npm run db:migrate
+`npm run setup` is a one-shot bootstrap. Three things are missing from a clone
+because they are gitignored, and it fills each in:
 
-# 3. Frontend dependencies
-npm --prefix frontend install
+- **PHP and Composer** live in `tools/`, so the portable runtime is downloaded
+  on first use
+- **`backend/.env`** is copied from `.env.example`, with an `APP_KEY` generated
+- **Dependencies and the database** are installed, migrated and seeded
 
-# 4. Playwright + Chromium
-npm install
+To run the tests as well:
+
+```powershell
 npx playwright install chromium
 ```
 

@@ -9,7 +9,7 @@
  *   node scripts/dev.mjs composer ...  run Composer in backend/
  */
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -79,6 +79,27 @@ function installPortablePhp() {
   }
 }
 
+/**
+ * backend/.env is gitignored, so a clone has none. The API still answers
+ * because its routes are stateless, but anything in the `web` middleware
+ * group (including GET /) needs an encryption key and would 500.
+ */
+function ensureEnv() {
+  const env = path.join(backendDir, '.env')
+  const example = path.join(backendDir, '.env.example')
+
+  if (!existsSync(env)) {
+    if (!existsSync(example)) fail(`Neither .env nor .env.example exists in ${backendDir}.`)
+    copyFileSync(example, env)
+    console.log('Created backend/.env from .env.example')
+  }
+
+  // [ \t]* rather than \s*, which would span the newline and let an empty
+  // APP_KEY= match the following line's value.
+  if (/^APP_KEY=[ \t]*\S+/m.test(readFileSync(env, 'utf8'))) return
+  if (artisan(['key:generate', '--force']) !== 0) process.exit(1)
+}
+
 function artisan(args, env = {}) {
   // Without Composer dependencies, Artisan dies on a missing autoloader and
   // buries the real cause under a stack trace.
@@ -111,8 +132,24 @@ function runComposer(args) {
   }).status
 }
 
-/** npm needs a shell on Windows; Node refuses to spawn npm.cmd directly. */
+/**
+ * npm needs a shell on Windows, but shell:true trips Node's DEP0190 warning
+ * about unescaped arguments. Prefer npm's JS entry point through the current
+ * Node binary, which also guarantees the right npm for this Node.
+ */
 function npm(args, cwd) {
+  const cli = path.join(
+    path.dirname(process.execPath),
+    'node_modules',
+    'npm',
+    'bin',
+    'npm-cli.js',
+  )
+
+  if (existsSync(cli)) {
+    return spawnSync(process.execPath, [cli, ...args], { cwd, stdio: 'inherit' }).status
+  }
+
   return spawnSync('npm', args, { cwd, stdio: 'inherit', shell: true }).status
 }
 
@@ -146,6 +183,7 @@ function pipe(stream, label, colour) {
 }
 
 function startApiOnly() {
+  ensureEnv()
   if (!existsSync(e2eDatabase)) writeFileSync(e2eDatabase, '')
 
   const env = { DB_CONNECTION: 'sqlite', DB_DATABASE: e2eDatabase, APP_ENV: 'local' }
@@ -160,6 +198,7 @@ function startApiOnly() {
 }
 
 function startBoth() {
+  ensureEnv()
   if (!existsSync(devDatabase)) {
     fail('The development database is missing.', `Expected: ${devDatabase}`, 'Run:  npm run db:migrate')
   }
@@ -241,6 +280,9 @@ switch (mode) {
       console.log('\nInstalling Laravel dependencies...\n')
       if (runComposer(['install']) !== 0) process.exit(1)
     }
+
+    // Needs the autoloader, so it has to follow composer install.
+    ensureEnv()
 
     if (!existsSync(path.join(frontendDir, 'node_modules'))) {
       console.log('\nInstalling frontend dependencies...\n')
